@@ -1,0 +1,117 @@
+html,
+body {
+    height: 100%;
+}
+
+h1 {
+    color: @first-color;
+
+    a {
+        color: @second-color;
+    }
+
+}
+
+a {
+    text-decoration: none;
+    color: @first-color;
+}
+
+.wrapper {
+    height: 100%;
+}
+
+#map {
+    height: 100%;
+}
+
+.form {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.4)
+}
+
+.form:hover {
+    background-color: rgba(255, 255, 255, 0.9)
+}
+
+ul {
+    list-style-type: none;
+    margin-left: 0;
+    padding-left: 0;
+
+    li {
+        margin-bottom: 15px;
+    }
+
+}
+
+.links {
+    margin-bottom: 10px;
+}
+
+.infoform {
+    position: absolute;
+    width: 500px;
+    height: 300px;
+    z-index: 11;
+    padding: 20px;
+    background-color: rgba(150, 150, 150, 0.4)
+}
+
+.drag {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 20px;
+    top: 0px;
+    background-color: rgba(0, 0, 0, 0.4)
+}
+
+.drag:hover {
+    background-color: rgba(0, 255, 0, 0.4)
+}
+
+.close, .closeFoto {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 0px;
+    top: 0px;
+    background-color: rgba(0, 0, 0, 0.4)
+}
+
+.close:hover, .closeFoto:hover {
+    background-color: rgba(255, 0, 0, 0.4)
+}
+
+.infoform:hover {
+    background-color: rgba(200, 200, 200, 0.5)
+}
+
+.fotoForm {
+    position: inherit;
+    width: 600px;
+    height: 400px;
+    right: 0px;
+    top: 0px;
+    z-index: 13;
+}
+
+.secretbutton {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 12;
+}
+
+.changes-text {
+    float: right
+}
+
+.changes-button {
+    float: right
+}
