@@ -132,15 +132,15 @@ function setupButtonsListeners() {
 		// newMarker.setMap(null)
 		updateCurrentData();
 		hideInputForm();
-		$('[pChanges]').hide();
-		$('[buttonSend]').show();
+		$('[pChanges]').fadeOut(300);
+		$('[buttonSend]').fadeIn(300);
 	});
 
 	$('[buttonSend]').on('click', function() {
 		sendData();
 		hideInputForm();
-		$('[pChanges]').show();
-		$('[buttonSend]').hide();
+		$('[pChanges]').fadeIn(300);
+		$('[buttonSend]').fadeOut(300);
 	});
 
 	$('[buttonDelete]').on('click', function() {
@@ -148,8 +148,8 @@ function setupButtonsListeners() {
 		currentOldMarker.LatLng.lng = 0;
 		updateCurrentData();
 		hideInputForm();
-		$('[pChanges]').hide();
-		$('[buttonSend]').show();
+		$('[pChanges]').fadeOut(300);
+		$('[buttonSend]').fadeIn(300);
 	});
 
 	// $('[showedInfoform]').on('click', function() {
@@ -183,23 +183,23 @@ function setupButtonsListeners() {
 function updateForm(state) {
 	shortCoords();
 	if (state == 'new') {
-		$('[buttonNextStep]').html('Дальше');
+		$('[buttonNextStep] span').html('Дальше');
 		$('[InputFormDate]').val('');
 		$('[dataLatLng]').html(shortLat + ', ' + shortLng);
 		$('[InputFormHeader]').val('');
 		$('[InputFormdescription]').val('');
 		$('[inputPhoto]').val('');
 		$('[inputKml]').val('');
-		$('[buttonDelete]').hide();
+		$('[buttonDelete]').fadeOut(300);
 	} else if (state == 'old') {
-		$('[buttonNextStep]').html('Редактировать');
+		$('[buttonNextStep] span').html('Редактировать');
 		$('[InputFormDate]').val(currentOldMarker.date);
 		$('[dataLatLng]').html(shortLat + ', ' + shortLng);
 		$('[InputFormHeader]').val(currentOldMarker.header);
 		$('[InputFormdescription]').val(currentOldMarker.description);
 		$('[inputPhoto]').val(currentOldMarker.photo);
 		$('[inputKml]').val(currentOldMarker.kml);
-		$('[buttonDelete]').show();
+		$('[buttonDelete]').fadeIn(300);
 	};
 };
 
@@ -217,7 +217,7 @@ function updateCurrentData() {
 		kml: $('[inputKml]').val()
 	};
 	currentData.push(x);
-	$('[button-secretbutton]').show();
+	$('[button-secretbutton]').fadeIn(300);
 };
 
 function drag() {
@@ -286,28 +286,28 @@ function shortCoords() {
 
 //показать-скрыть формы
 function showInputForm() {
-	$('[InputForm]').show();
+	$('[InputForm]').fadeIn(300);
 }
 
 function hideInputForm() {
-	$('[InputForm]').hide();
+	$('[InputForm]').fadeOut(300);
 }
 
 function hideInfoform() {
-	$('[showedInfoform]').hide();
+	$('[showedInfoform]').fadeOut(300);
 }
 
 function showInfoForm() {
 	hideFotoForm();
-	$('[showedInfoform]').show();
+	$('[showedInfoform]').fadeIn(300);
 }
 
 function showFotoForm() {
-	$('[fotoForm]').show();
+	$('[fotoForm]').fadeIn(300);
 }
 
 function hideFotoForm() {
-	$('[fotoForm]').hide();
+	$('[fotoForm]').fadeOut(300);
 }
 
 //Переместить при создании

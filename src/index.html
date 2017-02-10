@@ -8,51 +8,102 @@
 </head>
 <body>
 	<div class="wrapper">
-		<button type="button" class="changes-button"  buttonSend style="display: none;">Сохранить изменения</button>
+		<div class="popup" InputForm>
+			<div class="header">
+				<div class="header-title">Добавление новой точки</div>
+				<button class="close" type="button"></button>
+			</div>
+
+			<ul>
+				<li>
+					<label class="label" for="header">Заголовок</label>
+					<input class="input" type="text" name="header" value="Эль" InputFormHeader>
+				</li>
+				
+				<li>
+					<label class="label" for="coord">Координаты</label>
+					<input class="input" type="text" name="coord" value="43.2662, 42.4792">
+				</li>
+				
+				<li>
+					<label class="label" for="date">Дата</label>
+					<input class="input" type="text" name="date" value="10.02.2016" InputFormDate>
+				</li>
+				
+				<li>
+					<label class="label" for="kml">маршрут KML</label>
+					<input class="input" type="text" name="kml" value="10.02.2016" inputKml>
+				</li>
+				
+				<li>
+					<label class="label" for="desc">Описание</label>
+					<textarea class="input" name="desc" InputFormdescription>Хорошо отдохнули</textarea>
+				</li>
+				
+				<li>
+					<label class="label" for="photo">Фотографии</label>
+					<textarea class="input input-photo" type="text" name="photo" inputPhoto>photo1.jpg, photo2.jpg</textarea>
+				</li>
+			</ul>
+			
+			<div class="controls">
+				<div>
+					<button class="button" type="button" buttonNextStep><span>Дальше</span></button>
+					<button class="button" type="button" buttonCancel><span>Отмена</span></button>
+				</div>
+				
+				<div>
+					<button class="button" type="button" buttonSend><span>Сохранить</span></button>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- <button type="button" class="changes-button"  buttonSend style="display: none;">Сохранить изменения</button>
 		<p class="saved" pChanges style="display: none;">Сохранено</p>
 		<div class="form" InputForm style="display: none;">
 			<ul>
 				<li>
 					<div class="InputFormDate">дата</div>
-					<input placeholder="2000.12.31" InputFormDate>
+					<input class="input" class="input" placeholder="2000.12.31" InputFormDate>
 				</li>
-				
+		
 				<li>
 					<div class="LatLng" dataLatLng>координаты</div>
 				</li>
-				
+		
 				<li>
 					<div class="data-input">
-						<input placeholder="Заголовок" InputFormHeader>
+						<input class="input" placeholder="Заголовок" InputFormHeader>
 					</div>
 				</li>
-				
+		
 				<li>
 					<div class="data-input">
-						<textarea placeholder="Описание" InputFormdescription></textarea>
+						<textarea class="input" placeholder="Описание" InputFormdescription></textarea>
 					</div>
 				</li>
-				
+		
 				<li>
 					<div class="photo-input">
 						<div class="links">Ссылки на фото</div>
 						<div class="data-input">
-							<textarea placeholder="Ссылки через пробел" inputPhoto></textarea>
+							<textarea class="input" placeholder="Ссылки через пробел" inputPhoto></textarea>
 						</div>
 					</div>
 				</li>
-
+		
 				<li>
 					<div class="kml-input">
-						<input placeholder="Ссылка на KML" inputKml></input>
+						<input class="input" placeholder="Ссылка на KML" inputKml></input>
 					</div>
 				</li>
-				
+		
 				<li>
 					<div class="controls">
-						<button type="button" buttonNextStep></button>
-						<button type="button" buttonCancel>Отменить</button>
-						<button type="button" buttonDelete>Удалить</button>
+						<button class="button" type="button" buttonNextStep></button>
+						<button class="button" type="button" buttonCancel>Отменить</button>
+						<button class="button" type="button" buttonDelete>Удалить</button>
 					</div>
 				</li>
 			</ul>
@@ -72,6 +123,8 @@
 			<div class="drag" dragForm></div>
 			<div class="close" closeInfoform></div>
 		</div>
+		 -->
+		 
 		<div id="map"></div>
 	</div>
 	<script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHZv0tWzLV9kURTuDK4vT6KwX8gxTfFUg"></script>
