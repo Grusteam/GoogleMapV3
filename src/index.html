@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>65 WAT</title>
+	<title>65 WATT</title>
 	<meta charset="utf-8" />
 	<link rel="stylesheet" href="/styles/styles.css" media="all" />
-	<script src="/js/jquery-3.1.1.js" crossorigin="anonymous"></script>
+	<script defer src="/js/jquery-3.1.1.min.js"></script>
 </head>
 <body>
 	<div class="wrapper">
+		<button type="button" class="changes-button"  buttonSend style="display: none;">Сохранить изменения</button>
+		<p class="saved" pChanges style="display: none;">Сохранено</p>
 		<div class="form" InputForm style="display: none;">
 			<ul>
 				<li>
@@ -39,13 +41,18 @@
 						</div>
 					</div>
 				</li>
+
+				<li>
+					<div class="kml-input">
+						<input placeholder="Ссылка на KML" inputKml></input>
+					</div>
+				</li>
 				
 				<li>
 					<div class="controls">
-						<button type="button" buttonSave></button>
+						<button type="button" buttonNextStep></button>
 						<button type="button" buttonCancel>Отменить</button>
 						<button type="button" buttonDelete>Удалить</button>
-						<button type="button" class="changes-button" style="display: none;" buttonSend>Сохранить все изменения</button>
 					</div>
 				</li>
 			</ul>
@@ -55,18 +62,19 @@
 			<p id="field2"></p>
 			<p id="field3"></p>
 			<p id="field4"></p>
-			<p id="field5"></p>
+			<p id="field5" fotoField></p>
 			<div class="fotoForm" fotoForm style="display: none;">
 				<div fotoFormImg></div>
 				<div class="drag" dragFoto></div>
 				<div class="closeFoto" closeFoto></div>
 			</div>
+			<div class="kmlclass" kmlToggle></div>
 			<div class="drag" dragForm></div>
-			<div class="close" close></div>
+			<div class="close" closeInfoform></div>
 		</div>
 		<div id="map"></div>
 	</div>
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHZv0tWzLV9kURTuDK4vT6KwX8gxTfFUg"></script>
-	<script src="/js/main.js"></script>
+	<script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHZv0tWzLV9kURTuDK4vT6KwX8gxTfFUg"></script>
+	<script defer src="/js/main.js"></script>
 </body>
 </html>

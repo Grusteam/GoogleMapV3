@@ -1,5 +1,3 @@
-'use strict';
-
 // Поключение зависимостей
 var gulp         = require('gulp'),
     rigger       = require('gulp-rigger'),
@@ -36,7 +34,7 @@ var path = {
         content:  'src/content/**/*.*',
         images:   'src/images/**/*.*', //Синтаксис images/**/*.* означает - взять все файлы всех расширений из папки и из вложенных каталогов
         fonts:    'src/fonts/**/*.*',
-        favicon:  'src/favicon.png'
+        favicon:  'src/favicon.ico'
     },
 
     watch: { //Тут мы укажем, за изменением каких файлов мы хотим наблюдать

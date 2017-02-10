@@ -1,4 +1,124 @@
-@import "partials/normalize.less";
-@import "partials/flexboxgrid.less";
-@import "partials/variable.less";
-@import "partials/default.less";
+html,
+body {
+	height: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+.wrapper {
+	height: 100%;
+}
+
+#map {
+	height: 100%;
+}
+
+.form {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 10;
+	padding-top: 20px;
+	padding-left: 10px;
+	background-color: rgba(255, 255, 255, 0.4)
+}
+
+.form:hover {
+	background-color: rgba(255, 255, 255, 0.9)
+}
+
+ul {
+	list-style-type: none;
+	margin-left: 0;
+	padding-left: 0;
+
+	li {
+		margin-bottom: 15px;
+	}
+
+}
+
+.links {
+	margin-bottom: 10px;
+}
+
+.drag {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	right: 20px;
+	top: 0px;
+	background-color: rgba(0, 0, 0, 0.4)
+}
+
+.kmlclass {
+	position: absolute;
+	width: 130px;
+	height: 20px;
+	left: 0px;
+	bottom: 0px;
+	background-color: rgba(0, 0, 0, 0.4);
+	text-align: center;
+}
+
+.kmlclass:hover {
+	background-color: rgba(0, 255, 0, 0.4)
+}
+
+.drag:hover {
+	background-color: rgba(0, 0, 255, 0.4)
+}
+
+.close,
+.closeFoto {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	right: 0px;
+	top: 0px;
+	background-color: rgba(0, 0, 0, 0.4)
+}
+
+.close:hover,
+.closeFoto:hover {
+	background-color: rgba(255, 0, 0, 0.4)
+}
+
+.infoform {
+	position: absolute;
+	width: 500px;
+	height: 300px;
+	z-index: 11;
+	background-color: rgba(150, 150, 150, 0.4)
+}
+
+.infoform:hover {
+	background-color: rgba(200, 200, 200, 0.5)
+}
+
+.fotoForm {
+	position: inherit;
+	width: 800px;
+	height: 600px;
+	right: 0;
+	top: 0;
+	z-index: 13;/*    background-color: rgba(255, 0, 200, 0.5)*/
+}
+
+.changes-text {
+	float: right
+}
+
+.changes-button {
+	position: absolute;
+	z-index: 14;
+	left: 10px;
+	top: 10px;
+}
+
+.saved {
+	position: absolute;
+	z-index: 15;
+	left: 10px;
+	top: 0px;
+}
