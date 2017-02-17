@@ -18,7 +18,7 @@ body {
 	height: 100%;
 }
 
-.form {
+/* .form {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -26,9 +26,7 @@ body {
 	padding-top: 0px;
 	padding-left: 0px;
 	background-color: #192130;
-}
-
-
+} */
 
 ul {
 	list-style-type: none;
@@ -41,95 +39,17 @@ ul {
 
 }
 
-
-/* 
-.links {
-	margin-bottom: 10px;
-}
-
-.drag {
+.inputDataForm {
 	position: absolute;
-	width: 20px;
-	height: 20px;
-	right: 20px;
-	top: 0px;
-	background-color: rgba(0, 0, 0, 0.4)
-}
-
-.kmlclass {
-	position: absolute;
-	width: 130px;
-	height: 20px;
-	left: 0px;
-	bottom: 0px;
-	background-color: rgba(0, 0, 0, 0.4);
-	text-align: center;
-}
-
-.kmlclass:hover {
-	background-color: rgba(0, 255, 0, 0.4)
-}
-
-.drag:hover {
-	background-color: rgba(0, 0, 255, 0.4)
-}
-
-.infoform {
-	position: absolute;
-	width: 500px;
-	height: 300px;
-	z-index: 11;
-	background-color: #192130;
-}
-
-
-.fotoForm {
-	position: inherit;
-	width: 800px;
-	height: 600px;
-	right: 0;
 	top: 0;
-	z-index: 13;background-color: rgba(255, 0, 200, 0.5)
-}
-
-.changes-text {
-	float: right
-}
-
-.changes-button {
-	position: absolute;
-	z-index: 14;
-	left: 10px;
-	top: 10px;
-}
-
-.saved {
-	position: absolute;
-	z-index: 15;
-	left: 10px;
-	top: 0px;
-}
-
-.button {
-	background: linear-gradient(to right, #635d9b 0%, #5d949b 100%);
-	margin: 0 5px;
-	padding: 0 10px;
-	border: 0;
-	height: 27px;
-	text-transform: uppercase;
-}
- */
-.popup {
-	position: absolute;
-	top: 20%;
-	left: 50%;
+	left: 0;
 	z-index: 2;
-	width: 440px;
+	min-width: 430px;
 	padding: 0 20px 20px;
-	margin-left: -220px;
 	color: #63609b;
 	background-color: #192130;
 	font-family: Arial, Helvetica, sans-serif;
+	// box-sizing: border-box;
 }
 
 .header {
@@ -229,7 +149,6 @@ textarea.input {
 	overflow: hidden;
 	position: relative;
 	background-color: #5d949b;
-	margin: 0 5px;
 	padding: 0 20px;
 	border: 0;
 	width: 140px;
@@ -238,6 +157,7 @@ textarea.input {
 	font-weight: bold;
 	text-transform: uppercase;
 	cursor: pointer;
+	margin: 0 5px;
 }
 
 .button span {
@@ -272,6 +192,97 @@ textarea.input {
 	outline: none;
 }
 
+.infoform {
+	position: fixed;
+	z-index: 3;
+	width: 440px;
+	padding: 0 20px 20px;
+	background-color: #192130;
+	font-family: Arial, Helvetica, sans-serif;
+	box-sizing: border-box;
+}
+
+.field {
+	display: block;
+	margin-bottom: 10px;
+}
+
+.wat {
+	color: #63609b;
+	font-size: 10px;
+	text-transform: uppercase;
+	float: left;
+	width: 85px;
+}
+
+.formField {
+	font-size: 16px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #fff;
+	transition: background-color .3s ease;
+}
+
+.headInfo {
+	font-size: 20px;
+	color: #fff;
+	margin-top: 20px;
+	cursor: move;
+}
+
+.buttonway {
+	background-image: url(\images\way.png);
+	background-repeat: no-repeat;
+	background-position: 7% 50%;
+}
+
+.data-fotoform {
+	position: fixed;
+	top: 0;
+	right: 0;
+	max-width: 800px;
+	max-height: 600px;
+	z-index: 6;
+	top: 0;
+}
+
+.img-preview {
+	width: 80px;
+	height: 60px;
+	object-fit: cover;
+	transition: 0.3s;
+}
+
+.img-preview-area:hover .img-preview {
+	transform: scale(0.9);
+}
+
+#field5 .img-preview:hover {
+	transform: scale(1)
+}
+
+.img-preview-area {
+	display: inline-block;
+	transition: 0.3s;
+}
 
 
+.buttonway {
+	display: block;
+	margin-left: 0;
+	margin-top: 10px;
+}
 
+.move {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+[type="date"]::-webkit-inner-spin-button {
+  display: none;
+}
+
+[type="date"]::-webkit-calendar-picker-indicator{
+  background: none;
+  // padding: 0;
+}

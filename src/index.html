@@ -8,123 +8,88 @@
 </head>
 <body>
 	<div class="wrapper">
-		<div class="popup" InputForm>
+		<div class="inputDataForm" InputForm style="display: none">
 			<div class="header">
-				<div class="header-title">Добавление новой точки</div>
-				<button class="close" type="button"></button>
+				<div class="header-title" data-drag-form>Добавление новой точки</div>
+				<button class="close" type="button" data-close-input-cross></button>
 			</div>
 
 			<ul>
 				<li>
-					<label class="label" for="header">Заголовок</label>
-					<input class="input" type="text" name="header" value="Эль" InputFormHeader>
+					<label class="label" for="coord">Координаты</label>
+					<input class="input" type="text" name="coord" value="" disabled data-lat-lng>
 				</li>
 				
 				<li>
-					<label class="label" for="coord">Координаты</label>
-					<input class="input" type="text" name="coord" value="43.2662, 42.4792">
+					<label class="label" for="header">Заголовок</label>
+					<input class="input" type="text" name="header" value="Эль" data-input-form-header>
 				</li>
-				
+
 				<li>
 					<label class="label" for="date">Дата</label>
-					<input class="input" type="text" name="date" value="10.02.2016" InputFormDate>
+					<input class="input" id="datepicker" type="date" name="date" value="" data-input-form-date>
 				</li>
 				
 				<li>
 					<label class="label" for="kml">маршрут KML</label>
-					<input class="input" type="text" name="kml" value="10.02.2016" inputKml>
+					<input class="input" type="text" name="kml" value="10.02.2016" data-input-kml>
 				</li>
 				
 				<li>
 					<label class="label" for="desc">Описание</label>
-					<textarea class="input" name="desc" InputFormdescription>Хорошо отдохнули</textarea>
+					<textarea class="input" name="desc" data-input-form-description>Хорошо отдохнули</textarea>
 				</li>
 				
 				<li>
 					<label class="label" for="photo">Фотографии</label>
-					<textarea class="input input-photo" type="text" name="photo" inputPhoto>photo1.jpg, photo2.jpg</textarea>
+					<textarea class="input input-photo" type="text" name="photo" data-input-photo>photo1.jpg, photo2.jpg</textarea>
 				</li>
 			</ul>
 			
 			<div class="controls">
 				<div>
-					<button class="button" type="button" buttonNextStep><span>Дальше</span></button>
-					<button class="button" type="button" buttonCancel><span>Отмена</span></button>
-				</div>
-				
-				<div>
-					<button class="button" type="button" buttonSend><span>Сохранить</span></button>
+					<button class="button" type="button" data-button-save><span>Сохранить</span></button>
+					<button class="button" type="button" data-button-cancel><span>Отмена</span></button>
 				</div>
 			</div>
 		</div>
 
+		<div class="infoform" data-infoform style="display: none">
+			<div class="headInfo" id="field3" data-infoform-head></div><button class="close" type="button" data-close-info-cross></button>
 
-		<!-- <button type="button" class="changes-button"  buttonSend style="display: none;">Сохранить изменения</button>
-		<p class="saved" pChanges style="display: none;">Сохранено</p>
-		<div class="form" InputForm style="display: none;">
-			<ul>
-				<li>
-					<div class="InputFormDate">дата</div>
-					<input class="input" class="input" placeholder="2000.12.31" InputFormDate>
-				</li>
-		
-				<li>
-					<div class="LatLng" dataLatLng>координаты</div>
-				</li>
-		
-				<li>
-					<div class="data-input">
-						<input class="input" placeholder="Заголовок" InputFormHeader>
-					</div>
-				</li>
-		
-				<li>
-					<div class="data-input">
-						<textarea class="input" placeholder="Описание" InputFormdescription></textarea>
-					</div>
-				</li>
-		
-				<li>
-					<div class="photo-input">
-						<div class="links">Ссылки на фото</div>
-						<div class="data-input">
-							<textarea class="input" placeholder="Ссылки через пробел" inputPhoto></textarea>
-						</div>
-					</div>
-				</li>
-		
-				<li>
-					<div class="kml-input">
-						<input class="input" placeholder="Ссылка на KML" inputKml></input>
-					</div>
-				</li>
-		
-				<li>
-					<div class="controls">
-						<button class="button" type="button" buttonNextStep></button>
-						<button class="button" type="button" buttonCancel>Отменить</button>
-						<button class="button" type="button" buttonDelete>Удалить</button>
-					</div>
-				</li>
-			</ul>
-		</div>
-		<div class="infoform" showedInfoform style="display: none;">
-			<p id="field1"></p>
-			<p id="field2"></p>
-			<p id="field3"></p>
-			<p id="field4"></p>
-			<p id="field5" fotoField></p>
-			<div class="fotoForm" fotoForm style="display: none;">
-				<div fotoFormImg></div>
-				<div class="drag" dragFoto></div>
-				<div class="closeFoto" closeFoto></div>
+			<div class="field">
+				<div class="wat">
+					Координаты
+				</div>
+				<p class="formField" id="field1"></p>
 			</div>
-			<div class="kmlclass" kmlToggle></div>
-			<div class="drag" dragForm></div>
-			<div class="close" closeInfoform></div>
+
+			<div class="field">
+				<div class="wat">
+					Дата
+				</div>
+				<p class="formField" id="field2"></p>
+			</div>
+
+			<div class="field">
+				<div class="wat">
+					Описание
+				</div>
+				<p class="formField" id="field4"></p>
+			</div>
+			
+			<div id="field5" class="img-preview-area" data-fotofield>
+				<div class="previews" data-previews></div>
+			</div>
+
+			<button class="button buttonway" type="button" id="way" data-kml><span>Маршрут</span></button>
 		</div>
-		 -->
-		 
+		<div class="data-fotoform" data-fotoform style="display: none">
+			<div data-fotoform-img></div>
+			<button class="close" type="button" data-close-foto-cross></button>
+			<div class="move" data-move><img src="\images\move.png" width="25" alt=""></div>
+		</div>
+
 		<div id="map"></div>
 	</div>
 	<script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHZv0tWzLV9kURTuDK4vT6KwX8gxTfFUg"></script>
