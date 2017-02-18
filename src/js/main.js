@@ -9,12 +9,23 @@ var map,
 	fotoI,
 	fotoArr,
 	currentKml,
+	drawedPath,
+	currentPath = [],
+	markers = [],
 	update_timeout = null,
 	successIndexes = ['ru', 'net', 'com', 'jpg', 'png', 'http', 'www', 'img', 'https'],
+	Icon = 'images/100.png',
 	defaultCenter = {
 		lat: 47.2,
 		lng: 39.7
-	};
+	},
+	imageBounds = {
+		north: 47.273941,
+		south: 47.112216,
+		east: 39.72544,
+		west: 39.62655
+	},
+	imgOnMap;
 
 //следим за курсором
 function mouseListener() {
@@ -60,26 +71,31 @@ function init(loadedData) {
 //рендер старых маркеров из полыченной информации
 function currentMarkersRender(array) {
 	array.forEach(function(item, i, arr) {
-		creaeteCurrentMarker(item);
+		creaeteCurrentMarker(item, i);
 	});
 }
 
 //создание замыканий старых маркеров и обработка событий
-function creaeteCurrentMarker(item) {
-	let currentMarker = new google.maps.Marker({
+function creaeteCurrentMarker(item, i) {
+	let tempMark = new google.maps.Marker({
 		position: item.LatLng,
 		map: map,
-		title: item.header
+		title: item.header,
+		icon: Icon
 	});
 
-	currentMarker.addListener('click', function() {
+	markers.push(tempMark);
+
+	tempMark.addListener('click', function() {
 		hideInfoform();
 		currentOldMarker = item;
+		currentOldMarker.I = i
 		LatLng = currentOldMarker.LatLng;
 		infoformRender();
 		drag();
 		hideFotoform();
 		hideInputForm();
+		newMarker && newMarker.setMap(null);
 		update_timeout = setTimeout(function() {
 			!!currentKml && currentKml.setMap(null);
 			placeInfoform(formX, formY);
@@ -87,7 +103,8 @@ function creaeteCurrentMarker(item) {
 		}, 200);
 	});
 
-	currentMarker.addListener('dblclick', function() {
+	tempMark.addListener('dblclick', function() {
+		newMarker && newMarker.setMap(null);
 		clearTimeout(update_timeout);
 		hideInfoform();
 		updateForm('old');
@@ -96,15 +113,29 @@ function creaeteCurrentMarker(item) {
 
 }
 
+// скрытие маркера на текущей карте
+function setMapOnAll(map) {
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(map);
+  }
+}
+
+function clearMarkers() {
+  setMapOnAll(null);
+}
+
 //установка обработчиков событий нового маркера
 function setupMarkersListeners() {
 	//клик по карте
 	map.addListener('click', function(e) {
 		LatLng = e.latLng.toJSON();
+		currentPath.push(LatLng);
 		newMarker && newMarker.setMap(null);
 		newMarker = new google.maps.Marker({
 			position: LatLng,
-			map: map
+			map: map,
+			animation: google.maps.Animation.DROP,
+			icon: Icon
 		});
 
 		//обработка новых маркеров
@@ -119,7 +150,7 @@ function setupMarkersListeners() {
 			showInputForm();
 		});
 
-		hideInputForm();
+		// hideInputForm();
 		hideInfoform();
 		hideFotoform()
 	});
@@ -129,21 +160,39 @@ function setupMarkersListeners() {
 function kmlRender(x) {
 	if (x == undefined || x == "") {
 		$('[data-kml] span').html('еще нет');
+	} else {
+		currentKml = new google.maps.KmlLayer({
+			url: x,
+			map: map
+		});
+
+		// клик по kml сдою
+		currentKml.addListener('click', function(kmlEvent) {
+			console.log('kml click')
+		});
 	};
-	currentKml = new google.maps.KmlLayer({
-		url: x,
-		map: map
-	});
+
+	if (x[0] === '[') {
+		$('[data-kml] span').html('свой');
+	};
+
 }
 
 //установка обработчиков событий кнопок
 function setupButtonsListeners() {
-
 	$('[data-button-cancel]').on('click', function() {
 		hideInputForm();
 	});
 
+	$('[data-button-delete]').on('click', function() {
+		currentData[currentOldMarker.I] = 0;
+		$('[data-button-delete]').hide();
+		hideInputForm();
+		sendData();
+	});
+
 	$('[data-close-input-cross]').on('click', function() {
+		// drawedPath.setMap(null);
 		hideInputForm();
 	});
 
@@ -158,15 +207,7 @@ function setupButtonsListeners() {
 
 	$('[data-button-save]').on('click', function() {
 		updateCurrentData();
-		// creaeteCurrentMarker(currentData[currentData.length - 1]);
-		hideInputForm();
-		sendData();
 	});
-
-
-	// $('[buttonDelete]').on('click', function() {
-	// 	console.log('del')
-	// });
 
 	$('[closeInfoform]').on('click', function() {
 		hideInfoform();
@@ -198,23 +239,27 @@ function setupButtonsListeners() {
 //Меняем содержание формы заполнения
 function updateForm(state) {
 	shortCoords();
+	$('[data-lat-lng]').attr('value', shortLat + ', ' + shortLng);
+
 	if (state == 'new') {
-		$('[data-button-next-step] span').html('Дальше');
+		$('[data-drag-form]').html('Добавление новой точки');
 		$('[data-input-form-date]').val('');
-		$('[data-lat-lng]').attr('value', shortLat + ', ' + shortLng);
 		$('[data-input-form-header]').val('');
 		$('[data-input-form-description]').val('');
 		$('[data-input-photo]').val('');
 		$('[data-input-kml]').val('');
-		$('[buttonDelete]').fadeOut(300);
+		$('[data-draw-path]').show();
 	} else if (state == 'old') {
+		$('[data-drag-form]').html('Редактирование точки');
 		$('[data-input-form-date]').val(currentOldMarker.date);
-		$('[data-lat-lng]').attr('value', shortLat + ', ' + shortLng);
 		$('[data-input-form-header]').val(currentOldMarker.header);
 		$('[data-input-form-description]').val(currentOldMarker.description);
 		$('[data-input-photo]').val(currentOldMarker.photo);
 		$('[data-input-kml]').val(currentOldMarker.kml);
-		$('[buttonDelete]').fadeIn(300);
+		$('[data-draw-path]').hide();
+		if (currentOldMarker.kml === '') {
+			$('[data-draw-path]').show();
+		};
 	};
 }
 
@@ -232,13 +277,25 @@ function updateCurrentData() {
 		kml: $('[data-input-kml]').val()
 	};
 
+	if (x['header'] === 'del') {
+		$('[data-button-delete]').show();
+	} else {
+		next(x);
+	};
+}
+
+function next(x) {
+	drawedPath.setMap(null);
+	hideInputForm();
 	for (var i = currentData.length - 1; i >= 0; i--) {
 		if (x['LatLng']['lat'] == currentData[i]['LatLng']['lat']) {
 			currentData[i] = x;
+			sendData();
 			return;
 		};
 	};
 	currentData.push(x);
+	sendData();
 }
 
 function drag() {
@@ -361,6 +418,13 @@ function photoPrepare(string) {
 	};
 	return '';
 }
+
+// картинки на карте
+function drawOnMap() {
+	imgOnMap = new google.maps.GroundOverlay('https://img.jpg', imageBounds);
+	imgOnMap.setMap(map);
+}
+
 //заполнение Infoform
 function infoformRender() {
 	shortCoords();
@@ -406,13 +470,88 @@ function hideFotoform() {
 	$('[data-fotoform]').fadeOut(300);
 }
 
+function clearData(arr) {
+	var clearArr = arr.filter(function (it, i, arr) {
+		return it != 0 && it != null
+	});
+	return clearArr;
+}
+
 // ajax отправка данных
 function sendData() {
+	currentData = clearData(currentData);
 	$.ajax('/api', {
 		data: JSON.stringify(currentData),
 		type: 'POST',
 		success: function(responseData) {
+		clearMarkers();
+		markers = [];
 		currentMarkersRender(currentData);
 		}
 	});
 }
+
+/*function traffic() {
+	var trafficLayer = new google.maps.TrafficLayer();
+	trafficLayer.setMap(map);
+}
+
+
+function autoPath() {
+	var GDS = new google.maps.DirectionsService;
+	var countedPath = new google.maps.DirectionsRenderer;
+	countedPath.setMap(map);
+	countedPath.setOptions({draggable: true});
+	calculateAndDisplayRoute(GDS, countedPath);
+}
+
+function calculateAndDisplayRoute(GDS, countedPath) {
+	var
+		a = 'Moscow',
+		b = 'Vologda'
+		mode = 'DRIVING';
+  GDS.route({
+    origin: a,
+    destination: b,
+    travelMode: mode
+    // waypoints: [{location: 'Cocklebiddy, WA'}, {location: 'Broken Hill, NSW'}]
+  }, function(response, status) {
+    if (status === google.maps.DirectionsStatus.OK) {
+      countedPath.setDirections(response);
+    } else {
+      console.log('fail' + status);
+    }
+  });
+}
+*/
+/*// рисуем путь
+$('[data-draw-path]').on('click', function() {
+	currentPath = [];
+	map.addListener('click', function(e) {
+	})
+
+});
+
+$('[data-draw-path2]').on('click', function() {
+	$('[data-input-kml]').val(JSON.stringify(currentPath))
+	drawedPath.setMap(null);
+});
+
+function drawPath() {
+	drawedPath = new google.maps.Polyline({
+		path: currentPath,
+		geodesic: true,
+		strokeColor: '#2D4AD1',
+		strokeOpacity: 0.7,
+		strokeWeight: 3
+	});
+
+	drawedPath.setMap(map);
+}*/
+
+
+
+
+/*function elevation(argument) {
+	https://developers.google.com/maps/documentation/javascript/examples/elevation-paths?hl=ru
+}*/
