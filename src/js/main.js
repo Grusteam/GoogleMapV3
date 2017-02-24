@@ -6,8 +6,8 @@ var map,
 	LatLng,
 	mouseX,
 	mouseY,
-	fotoI,
-	fotoArr,
+	// fotoI,
+	fotoArr = [],
 	currentKml,
 	drawedPath,
 	currentPath = [],
@@ -18,66 +18,69 @@ var map,
 	defaultCenter = {
 		lat: 47.2,
 		lng: 39.7
-	},
-	imageBounds = {
-		north: 47.273941,
-		south: 47.112216,
-		east: 39.72544,
-		west: 39.62655
-	},
-	imgOnMap;
+	};
+
+	// imageBounds = {
+	// 	north: 47.273941,
+	// 	south: 47.112216,
+	// 	east: 39.72544,
+	// 	west: 39.62655
+	// },
+	// imgOnMap;
 
 //следим за курсором
 function mouseListener() {
 	document.onmousemove = function(e) {
 		// появление инфоформ
 		formX = e.pageX > $(window).width() - 220 ? $(window).width() - 440 : e.pageX > 220 ? e.pageX - 220 : 0;
-		formY = e.pageY < $('[data-infoform]').height() + 20 ? 0 : e.pageY - $('[data-infoform]').height() - 35 ;
+		formY = e.pageY < $('[data-infoform]').height() + 20 ? 0 : e.pageY - $('[data-infoform]').height() - 35;
 		// перемещение форм
 		mouseX = e.pageX > 0 ? e.pageX : 0;
 		mouseY = e.pageY > 0 ? e.pageY : 0;
-	}
+	};
 }
 
 start();
 
 // запарашиваем данные из файла	
 function start() {
-	$.ajax('/data/data.json', {
+	$.ajax('/data/data.json',{
 		type: 'GET',
 		success: function(data) {
-			currentData = data;
+			console.log(typeof data);
+			currentData = data; //JSON.parse(data);
 			map = new google.maps.Map(document.getElementById('map'), {
-				zoom: 6,
+				zoom: 4,
 				center: currentData[0] ? currentData[currentData.length - 1].LatLng : defaultCenter,
 				mapTypeControlOptions: {
 					style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
 					position: google.maps.ControlPosition.TOP_RIGHT
 				}
 			});
-			init(currentData);
+			init();
 		}
 	});
-};
+}
 
 //после сработки аякса
-function init(loadedData) {
+function init() {
 	mouseListener();
 	setupButtonsListeners();
 	setupMarkersListeners();
-	currentMarkersRender(loadedData);
+	currentMarkersRender();
 }
 
+
 //рендер старых маркеров из полыченной информации
-function currentMarkersRender(array) {
-	array.forEach(function(item, i, arr) {
+function currentMarkersRender() {
+	currentData.forEach(function(item, i, arr) {
 		creaeteCurrentMarker(item, i);
 	});
 }
 
 //создание замыканий старых маркеров и обработка событий
 function creaeteCurrentMarker(item, i) {
-	let tempMark = new google.maps.Marker({
+	var tempMark = new google.maps.Marker({
 		position: item.LatLng,
 		map: map,
 		title: item.header,
@@ -89,22 +92,26 @@ function creaeteCurrentMarker(item, i) {
 	tempMark.addListener('click', function() {
 		hideInfoform();
 		currentOldMarker = item;
-		currentOldMarker.I = i
+		currentOldMarker.I = i;
 		LatLng = currentOldMarker.LatLng;
+		// map.panTo(LatLng);
+		// if (map.getZoom() < 9){
+		// map.setZoom(10);
+		// };
 		infoformRender();
 		drag();
 		hideFotoform();
 		hideInputForm();
-		newMarker && newMarker.setMap(null);
+		if (newMarker) newMarker.setMap(null);
 		update_timeout = setTimeout(function() {
-			!!currentKml && currentKml.setMap(null);
+			if (currentKml) currentKml.setMap(null);
 			placeInfoform(formX, formY);
 			showInfoform();
 		}, 200);
 	});
 
 	tempMark.addListener('dblclick', function() {
-		newMarker && newMarker.setMap(null);
+		if (newMarker) newMarker.setMap(null);
 		clearTimeout(update_timeout);
 		hideInfoform();
 		updateForm('old');
@@ -115,13 +122,13 @@ function creaeteCurrentMarker(item, i) {
 
 // скрытие маркера на текущей карте
 function setMapOnAll(map) {
-  for (var i = 0; i < markers.length; i++) {
-    markers[i].setMap(map);
-  }
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setMap(map);
+	}
 }
 
 function clearMarkers() {
-  setMapOnAll(null);
+	setMapOnAll(null);
 }
 
 //установка обработчиков событий нового маркера
@@ -130,7 +137,7 @@ function setupMarkersListeners() {
 	map.addListener('click', function(e) {
 		LatLng = e.latLng.toJSON();
 		currentPath.push(LatLng);
-		newMarker && newMarker.setMap(null);
+		if (newMarker) newMarker.setMap(null);
 		newMarker = new google.maps.Marker({
 			position: LatLng,
 			map: map,
@@ -152,15 +159,13 @@ function setupMarkersListeners() {
 
 		// hideInputForm();
 		hideInfoform();
-		hideFotoform()
+		hideFotoform();
 	});
 }
 
 //рендер кмл
 function kmlRender(x) {
-	if (x == undefined || x == "") {
-		$('[data-kml] span').html('еще нет');
-	} else {
+	
 		currentKml = new google.maps.KmlLayer({
 			url: x,
 			map: map
@@ -168,13 +173,12 @@ function kmlRender(x) {
 
 		// клик по kml сдою
 		currentKml.addListener('click', function(kmlEvent) {
-			console.log('kml click')
+			console.log('kml click');
 		});
-	};
-
-	if (x[0] === '[') {
-		$('[data-kml] span').html('свой');
-	};
+	
+	// if (x[0] === '[') {
+	// 	$('[data-kml] span').html('свой');
+	// }
 
 }
 
@@ -186,7 +190,6 @@ function setupButtonsListeners() {
 
 	$('[data-button-delete]').on('click', function() {
 		currentData[currentOldMarker.I] = 0;
-		$('[data-button-delete]').hide();
 		hideInputForm();
 		sendData();
 	});
@@ -226,21 +229,21 @@ function setupButtonsListeners() {
 		hideInfoform();
 	});
 
-	$('[data-fotoform-img]').on('click', function() {
+	/*$('[data-fotoform-img]').on('click', function() {
 		fotoI = fotoI < fotoArr.length - 1 ? fotoI + 1 : 0;
 		var q = '<img src="' + fotoArr[fotoI] + '" width="800" />';
-		
+
 		$('[data-fotoform-img]').fadeOut(0);
 		$('[data-fotoform-img]').html(q);
 		$('[data-fotoform-img]').fadeIn(150);
-	});
+	});*/
 }
 
 //Меняем содержание формы заполнения
 function updateForm(state) {
 	shortCoords();
 	$('[data-lat-lng]').attr('value', shortLat + ', ' + shortLng);
-
+	$('[data-button-delete]').hide();
 	if (state == 'new') {
 		$('[data-drag-form]').html('Добавление новой точки');
 		$('[data-input-form-date]').val('');
@@ -259,8 +262,8 @@ function updateForm(state) {
 		$('[data-draw-path]').hide();
 		if (currentOldMarker.kml === '') {
 			$('[data-draw-path]').show();
-		};
-	};
+		}
+	}
 }
 
 //запись введенных данных из формы в текущий массив данный
@@ -277,29 +280,29 @@ function updateCurrentData() {
 		kml: $('[data-input-kml]').val()
 	};
 
-	if (x['header'] === 'del') {
+	if (x.header === 'del') {
 		$('[data-button-delete]').show();
 	} else {
 		next(x);
-	};
+	}
 }
 
 function next(x) {
-	drawedPath.setMap(null);
+	// drawedPath.setMap(null);
 	hideInputForm();
 	for (var i = currentData.length - 1; i >= 0; i--) {
-		if (x['LatLng']['lat'] == currentData[i]['LatLng']['lat']) {
+		if (x.LatLng.lat == currentData[i].LatLng.lat) {
 			currentData[i] = x;
 			sendData();
 			return;
-		};
-	};
+		}
+	}
 	currentData.push(x);
 	sendData();
 }
 
 function drag() {
-	var 
+	var
 		dragstart1,
 		dragstart2,
 		dragstart3,
@@ -326,21 +329,21 @@ function drag() {
 	});
 
 	$(window).on('mousemove', function() {
-		if (dragstart1 == true) {
+		if (dragstart1 === true) {
 			moveInfoform(mouseX - offsetX - 20, mouseY - 30);
-		};
+		}
 	});
 
 	$(window).on('mousemove', function() {
-		if (dragstart2 == true) {
+		if (dragstart2 === true) {
 			moveInputDataForm(mouseX - offsetX - 20, mouseY - 30);
-		};
+		}
 	});
 
 	$(window).on('mousemove', function() {
-		if (dragstart3 == true) {
+		if (dragstart3 === true) {
 			moveFotoForm(mouseX - offsetX, mouseY - 10);
-		};
+		}
 	});
 
 	$(window).on('mouseup', function() {
@@ -360,78 +363,108 @@ function placeInfoform(x, y) {
 
 //Переместить при перетаскивании
 function moveInfoform(x, y) {
-	if (x < 0) {x = 0};
-	if (y < 0) {y = 0};
-	if (x + 440 > window.innerWidth) {x = window.innerWidth - 440};
+	if (x < 0) {
+		x = 0;
+	}
+	if (y < 0) {
+		y = 0;
+	}
+	if (x + 440 > window.innerWidth) {
+		x = window.innerWidth - 440;
+	}
 	if (y + $('[data-infoform]').height() + 20 > window.innerHeight) {
-		y = window.innerHeight - $('[data-infoform]').height() - 20
-	};
+		y = window.innerHeight - $('[data-infoform]').height() - 20;
+	}
 	$('[data-infoform]').css('left', x);
 	$('[data-infoform]').css('top', y);
 }
 
 function moveInputDataForm(x, y) {
-	if (x < 0) {x = 0};
-	if (y < 0) {y = 0};
-	if (x + $('[InputForm]').width() + 40 > window.innerWidth) {x = window.innerWidth - $('[InputForm]').width() - 40};
+	if (x < 0) {
+		x = 0;
+	}
+	if (y < 0) {
+		y = 0;
+	}
+	if (x + $('[InputForm]').width() + 40 > window.innerWidth) {
+		x = window.innerWidth - $('[InputForm]').width() - 40;
+	}
 	if (y + $('[InputForm]').height() + 20 > window.innerHeight) {
-		y = window.innerHeight - $('[InputForm]').height() - 20
-	};
+		y = window.innerHeight - $('[InputForm]').height() - 20;
+	}
 	$('[InputForm]').css('left', x);
 	$('[InputForm]').css('top', y);
 }
 
 function placeFotoform() {
-	let
+	var
 		x = window.innerWidth - 800,
 		y = 0;
 	moveFotoForm(x, y);
 }
 
 function moveFotoForm(x, y) {
-	if (x < 0) {x = 0};
-	if (y < 0) {y = 0};
-	if (x + $('[data-fotoform-img]').width() > window.innerWidth) {x = window.innerWidth - 800};
+	if (x < 0) {
+		x = 0;
+	}
+	if (y < 0) {
+		y = 0;
+	}
+	if (x + $('[data-fotoform-img]').width() > window.innerWidth) {
+		x = window.innerWidth - 800;
+	}
 	if (y + $('[data-fotoform-img]').height() > window.innerHeight) {
-		y = window.innerHeight - $('[data-fotoform-img]').height() + 5
-	};
+		y = window.innerHeight - $('[data-fotoform-img]').height() + 5;
+	}
 	$('[data-fotoform]').css('left', x);
 	$('[data-fotoform]').css('top', y);
 }
 
 //поле фотографий
+var imgTemplate = $('[data-fotoform-img]').clone().html();
+
 function photoPrepare(string) {
+	var fotohtml = [];
 	fotoArr = [];
-	let y = string.split(' ');
-	let z = '';
+	var y = string.split(' ');
+	var z = '';
 	y.forEach(function(it) {
 		fotoArr.push(it);
+		forRama = 'src="' + it + '"';
+		console.log(forRama);
+		var tempString = imgTemplate.replace('{{##}}', forRama);
+
+		fotohtml.push(tempString);
 		z += '<img src="' + it + '" class="img-preview" />';
-	})
-	fotoI = 0;
-	w = '<img src="' + fotoArr[fotoI] + '" width="800" />';
+	});
+
+	$('[data-fotoform-img]').html(fotohtml);
+	initFotorama();
+	// fotoI = 0;
+	// w = '<img src="' + fotoArr[fotoI] + '" width="800" />';
 	for (var i = successIndexes.length - 1; i >= 0; i--) {
 		if (string.indexOf(successIndexes[i]) >= 0) {
-			$('[data-fotoform-img]').html(w);
+			// $('[data-fotoform-img]').html(w);
 			return z;
-		};
-	};
+		}
+	}
 	return '';
-}
-
-// картинки на карте
-function drawOnMap() {
-	imgOnMap = new google.maps.GroundOverlay('https://img.jpg', imageBounds);
-	imgOnMap.setMap(map);
 }
 
 //заполнение Infoform
 function infoformRender() {
+	var kml = $('[data-kml]');
+	console.log();
+	if (currentOldMarker.kml === undefined || currentOldMarker.kml === '') {
+		kml.hide();
+	} else {
+		kml.show();
+	}
 	shortCoords();
 	$('[data-kml] span').html('Маршрут');
 	$('#field1').html(shortLat + ', ' + shortLng);
-	let x = currentOldMarker.date;
-	$('#field2').html(x.substr(8, 2) + '.' + x.substr(5, 2)  + '.' + x.substr(0, 4));
+	var x = currentOldMarker.date;
+	$('#field2').html(x.substr(8, 2) + '.' + x.substr(5, 2) + '.' + x.substr(0, 4));
 	$('#field3').html(currentOldMarker.header);
 	$('#field4').html(currentOldMarker.description);
 	$('[data-previews]').html(photoPrepare(currentOldMarker.photo));
@@ -471,8 +504,8 @@ function hideFotoform() {
 }
 
 function clearData(arr) {
-	var clearArr = arr.filter(function (it, i, arr) {
-		return it != 0 && it != null
+	var clearArr = arr.filter(function(it, i, arr) {
+		return it !== 0 && it !== null;
 	});
 	return clearArr;
 }
@@ -484,12 +517,147 @@ function sendData() {
 		data: JSON.stringify(currentData),
 		type: 'POST',
 		success: function(responseData) {
-		clearMarkers();
-		markers = [];
-		currentMarkersRender(currentData);
+			clearMarkers();
+			markers = [];
+			currentMarkersRender(currentData);
 		}
 	});
 }
+
+//
+//отдельная секция фоторамы
+//
+
+var count,
+	paginationDot = $('.dot-tmpl').clone().html(),
+	paginationStr = '<div class="dot-tmpl" hidden><img src="images/635d9b.png" data-dot-ind="{{#}}"><span> </span></div>',
+	isThrottled = false,
+	index = 1,
+	// count = $('.images').find('img').length,
+	fotoramaWdth = $('.data-fotoform').width(),
+	paginationHtmlArr;
+
+function initFotorama() {
+	index = 1;
+	dataOfPad = '[data-dot-ind="' + index + '"]';
+	paginationHtmlArr = [];
+	count = fotoArr.length;
+	// size = count * fotoramaWdth;
+	render();
+	$('.pagination').html(paginationStr);
+
+	for (var i = 1; i <= count; i++) {
+		var y = paginationDot.replace('{{#}}', i);
+		paginationHtmlArr.push(y);
+	}
+
+	$('.pagination').append(paginationHtmlArr);
+	bluefy();
+}
+
+function greenify() {
+	$(dataOfPad).attr('src', 'images/635d9b.png');
+}
+
+function bluefy() {
+	$(dataOfPad).attr('src', 'images/5d949b.png');
+}
+
+
+$('[data-area="left"]').click(throttle(left, 330));
+$('[data-area="right"]').click(throttle(right, 330));
+
+function left() {
+	greenify();
+	index--;
+	if (index < 1) {
+		index = count;
+	}
+	dataOfPad = '[data-dot-ind="' + index + '"]';
+	bluefy();
+	render();
+}
+
+function right() {
+	greenify();
+	index++;
+	if (index > count) {
+		index = 1;
+	}
+	dataOfPad = '[data-dot-ind="' + index + '"]';
+	bluefy();
+	render();
+}
+
+function render() {
+	var n = -(index * fotoramaWdth - fotoramaWdth) + 'px';
+	$('.images').css('margin-left', n);
+}
+
+$('.pagination').click(function(e) {
+	greenify();
+	index = +e.target.dataset.dotInd;
+	dataOfPad = '[data-dot-ind="' + index + '"]';
+	bluefy();
+	render();
+});
+
+function throttle(func, ms) {
+	var
+		savedArgs,
+		savedThis;
+
+	function wrapper() {
+		if (isThrottled) { // (2)
+			savedArgs = arguments;
+			savedThis = this;
+			return;
+		}
+		func.apply(this, arguments); // (1)
+		isThrottled = true;
+		setTimeout(function() {
+			isThrottled = false; // (3)
+			if (savedArgs) {
+				wrapper.apply(savedThis, savedArgs);
+				savedArgs = savedThis = null;
+			}
+		}, ms);
+	}
+	return wrapper;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// картинки на карте
+// function drawOnMap() {
+// 	imgOnMap = new google.maps.GroundOverlay('https://img.jpg', imageBounds);
+// 	imgOnMap.setMap(map);
+// }
+
+
+
+
 
 /*function traffic() {
 	var trafficLayer = new google.maps.TrafficLayer();
@@ -548,7 +716,6 @@ function drawPath() {
 
 	drawedPath.setMap(map);
 }*/
-
 
 
 

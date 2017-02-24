@@ -87,10 +87,23 @@
 
 			<button class="button buttonway" type="button" id="way" data-kml><span>Маршрут</span></button>
 		</div>
+<!-- 		<div class="data-fotoform" data-fotoform style="display: none">
+	<div data-fotoform-img></div>
+	<button class="close" type="button" data-close-foto-cross></button>
+	<div class="move" data-move><img src="\images\move.png" width="25" alt=""></div>
+</div> -->
+
 		<div class="data-fotoform" data-fotoform style="display: none">
-			<div data-fotoform-img></div>
+			<div class="images img-tmpl" data-fotoform-img hidden><img {{##}}></div>
+			<div class="left-area" data-area="left"></div>
+			<div class="right-area" data-area="right"></div>
+<!-- 			<div class="arrows">
+	<img src="images/slider-arrows.png">
+</div> -->
+			<div class="pagination">
+				<div class="dot-tmpl" hidden><img src="images/635d9b.png" data-dot-ind="{{#}}"><span> </span></div>
+			</div>
 			<button class="close" type="button" data-close-foto-cross></button>
-			<div class="move" data-move><img src="\images\move.png" width="25" alt=""></div>
 		</div>
 
 		<div id="map"></div>
