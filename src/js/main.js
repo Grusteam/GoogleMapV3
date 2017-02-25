@@ -1,12 +1,14 @@
 // объявление глобальных переменных
-var map,
+var 
+	localData,
+	toLocalStorage,
+	map,
 	currentOldMarker,
 	newMarker,
 	currentData,
 	LatLng,
 	mouseX,
 	mouseY,
-	// fotoI,
 	fotoArr = [],
 	currentKml,
 	drawedPath,
@@ -20,13 +22,6 @@ var map,
 		lng: 39.7
 	};
 
-	// imageBounds = {
-	// 	north: 47.273941,
-	// 	south: 47.112216,
-	// 	east: 39.72544,
-	// 	west: 39.62655
-	// },
-	// imgOnMap;
 
 //следим за курсором
 function mouseListener() {
@@ -44,22 +39,44 @@ start();
 
 // запарашиваем данные из файла	
 function start() {
-	$.ajax('/data/data.json',{
-		type: 'GET',
-		success: function(data) {
-			console.log(typeof data);
-			currentData = data; //JSON.parse(data);
-			map = new google.maps.Map(document.getElementById('map'), {
-				zoom: 4,
-				center: currentData[0] ? currentData[currentData.length - 1].LatLng : defaultCenter,
-				mapTypeControlOptions: {
-					style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-					position: google.maps.ControlPosition.TOP_RIGHT
-				}
-			});
-			init();
+	// localData = localStorage.getItem('G3DATA');
+	// localData = false;
+	if (localData) {
+		currentData = JSON.parse(localData);
+		mapRender();
+		console.log('localData');
+	} else {
+		$.ajax('/data/data.json', {
+			type: 'GET',
+			cache: false,
+			success: function(data) {
+				// console.log(typeof data); // разный тип при разном разхмещении
+				currentData = data; // для локалхоста
+				// currentData = JSON.parse(data); // для серевера
+				mapRender();
+				setLocalStorage();
+			}
+		});
+		console.log('webData');
+	}
+}
+
+function setLocalStorage() {
+	toLocalStorage = JSON.stringify(currentData);
+	localStorage.setItem('G3DATA', toLocalStorage);
+}
+
+// рендер карты
+function mapRender() {
+	map = new google.maps.Map(document.getElementById('map'), {
+		zoom: 6,
+		center: currentData[0] ? currentData[currentData.length - 1].LatLng : defaultCenter,
+		mapTypeControlOptions: {
+			style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+			position: google.maps.ControlPosition.TOP_RIGHT
 		}
 	});
+	init();
 }
 
 //после сработки аякса
@@ -165,21 +182,14 @@ function setupMarkersListeners() {
 
 //рендер кмл
 function kmlRender(x) {
-	
-		currentKml = new google.maps.KmlLayer({
-			url: x,
-			map: map
-		});
-
-		// клик по kml сдою
-		currentKml.addListener('click', function(kmlEvent) {
-			console.log('kml click');
-		});
-	
-	// if (x[0] === '[') {
-	// 	$('[data-kml] span').html('свой');
-	// }
-
+	currentKml = new google.maps.KmlLayer({
+		url: x,
+		map: map
+	});
+	// клик по kml сдою
+	currentKml.addListener('click', function(kmlEvent) {
+		console.log('kml click');
+	});
 }
 
 //установка обработчиков событий кнопок
@@ -195,7 +205,6 @@ function setupButtonsListeners() {
 	});
 
 	$('[data-close-input-cross]').on('click', function() {
-		// drawedPath.setMap(null);
 		hideInputForm();
 	});
 
@@ -224,19 +233,12 @@ function setupButtonsListeners() {
 		hideFotoform();
 	});
 
-	$('[data-previews]').on('click', function() {
+	$('[data-previews]').on('click', function(e) {
+		fotoramaIndex = e.target.dataset.prevNum;
+		initFotorama();
 		showFotoform();
 		hideInfoform();
 	});
-
-	/*$('[data-fotoform-img]').on('click', function() {
-		fotoI = fotoI < fotoArr.length - 1 ? fotoI + 1 : 0;
-		var q = '<img src="' + fotoArr[fotoI] + '" width="800" />';
-
-		$('[data-fotoform-img]').fadeOut(0);
-		$('[data-fotoform-img]').html(q);
-		$('[data-fotoform-img]').fadeIn(150);
-	});*/
 }
 
 //Меняем содержание формы заполнения
@@ -288,7 +290,6 @@ function updateCurrentData() {
 }
 
 function next(x) {
-	// drawedPath.setMap(null);
 	hideInputForm();
 	for (var i = currentData.length - 1; i >= 0; i--) {
 		if (x.LatLng.lat == currentData[i].LatLng.lat) {
@@ -410,11 +411,11 @@ function moveFotoForm(x, y) {
 	if (y < 0) {
 		y = 0;
 	}
-	if (x + $('[data-fotoform-img]').width() > window.innerWidth) {
+	if (x + $('[data-fotoform]').width() > window.innerWidth) {
 		x = window.innerWidth - 800;
 	}
 	if (y + $('[data-fotoform-img]').height() > window.innerHeight) {
-		y = window.innerHeight - $('[data-fotoform-img]').height() + 5;
+		y = window.innerHeight - $('[data-fotoform-img]').height();
 	}
 	$('[data-fotoform]').css('left', x);
 	$('[data-fotoform]').css('top', y);
@@ -428,23 +429,17 @@ function photoPrepare(string) {
 	fotoArr = [];
 	var y = string.split(' ');
 	var z = '';
-	y.forEach(function(it) {
+	y.forEach(function(it, i) {
 		fotoArr.push(it);
-		forRama = 'src="' + it + '"';
-		console.log(forRama);
+		forRama = '<img src="' + it + '">';
 		var tempString = imgTemplate.replace('{{##}}', forRama);
-
 		fotohtml.push(tempString);
-		z += '<img src="' + it + '" class="img-preview" />';
+		z += '<img src="' + it + '" class="img-preview" data-prev-num="' + (i + 1) + '" />';
 	});
 
 	$('[data-fotoform-img]').html(fotohtml);
-	initFotorama();
-	// fotoI = 0;
-	// w = '<img src="' + fotoArr[fotoI] + '" width="800" />';
 	for (var i = successIndexes.length - 1; i >= 0; i--) {
 		if (string.indexOf(successIndexes[i]) >= 0) {
-			// $('[data-fotoform-img]').html(w);
 			return z;
 		}
 	}
@@ -454,12 +449,12 @@ function photoPrepare(string) {
 //заполнение Infoform
 function infoformRender() {
 	var kml = $('[data-kml]');
-	console.log();
 	if (currentOldMarker.kml === undefined || currentOldMarker.kml === '') {
 		kml.hide();
 	} else {
 		kml.show();
 	}
+
 	shortCoords();
 	$('[data-kml] span').html('Маршрут');
 	$('#field1').html(shortLat + ', ' + shortLng);
@@ -510,40 +505,20 @@ function clearData(arr) {
 	return clearArr;
 }
 
-// ajax отправка данных
-function sendData() {
-	currentData = clearData(currentData);
-	$.ajax('/api', {
-		data: JSON.stringify(currentData),
-		type: 'POST',
-		success: function(responseData) {
-			clearMarkers();
-			markers = [];
-			currentMarkersRender(currentData);
-		}
-	});
-}
-
-//
 //отдельная секция фоторамы
-//
-
 var count,
 	paginationDot = $('.dot-tmpl').clone().html(),
-	paginationStr = '<div class="dot-tmpl" hidden><img src="images/635d9b.png" data-dot-ind="{{#}}"><span> </span></div>',
+	paginationStr = $('.pagination').html(),
 	isThrottled = false,
-	index = 1,
-	// count = $('.images').find('img').length,
+	fotoramaIndex = 1,
 	fotoramaWdth = $('.data-fotoform').width(),
 	paginationHtmlArr;
 
+
 function initFotorama() {
-	index = 1;
-	dataOfPad = '[data-dot-ind="' + index + '"]';
+	dataOfPad = '[data-dot-ind="' + fotoramaIndex + '"]';
 	paginationHtmlArr = [];
 	count = fotoArr.length;
-	// size = count * fotoramaWdth;
-	render();
 	$('.pagination').html(paginationStr);
 
 	for (var i = 1; i <= count; i++) {
@@ -552,71 +527,67 @@ function initFotorama() {
 	}
 
 	$('.pagination').append(paginationHtmlArr);
-	bluefy();
+	fotoramaRender();
 }
 
-function greenify() {
+function makeBlue() {
 	$(dataOfPad).attr('src', 'images/635d9b.png');
 }
 
-function bluefy() {
+function makeGreen() {
 	$(dataOfPad).attr('src', 'images/5d949b.png');
 }
-
 
 $('[data-area="left"]').click(throttle(left, 330));
 $('[data-area="right"]').click(throttle(right, 330));
 
 function left() {
-	greenify();
-	index--;
-	if (index < 1) {
-		index = count;
+	makeBlue();
+	fotoramaIndex--;
+	if (fotoramaIndex < 1) {
+		fotoramaIndex = count;
 	}
-	dataOfPad = '[data-dot-ind="' + index + '"]';
-	bluefy();
-	render();
+	fotoramaRender();
 }
 
 function right() {
-	greenify();
-	index++;
-	if (index > count) {
-		index = 1;
+	makeBlue();
+	fotoramaIndex++;
+	if (fotoramaIndex > count) {
+		fotoramaIndex = 1;
 	}
-	dataOfPad = '[data-dot-ind="' + index + '"]';
-	bluefy();
-	render();
+	fotoramaRender();
 }
 
-function render() {
-	var n = -(index * fotoramaWdth - fotoramaWdth) + 'px';
+function fotoramaRender() {
+	dataOfPad = '[data-dot-ind="' + fotoramaIndex + '"]';
+	makeGreen();
+	var n = -(fotoramaIndex * fotoramaWdth - fotoramaWdth) + 'px';
 	$('.images').css('margin-left', n);
 }
 
 $('.pagination').click(function(e) {
-	greenify();
-	index = +e.target.dataset.dotInd;
-	dataOfPad = '[data-dot-ind="' + index + '"]';
-	bluefy();
-	render();
+	makeBlue();
+	fotoramaIndex = +e.target.dataset.dotInd;
+	fotoramaRender();
 });
 
+// пропуск запросов Ф в промежутке времени
 function throttle(func, ms) {
 	var
 		savedArgs,
 		savedThis;
 
 	function wrapper() {
-		if (isThrottled) { // (2)
+		if (isThrottled) {
 			savedArgs = arguments;
 			savedThis = this;
 			return;
 		}
-		func.apply(this, arguments); // (1)
+		func.apply(this, arguments);
 		isThrottled = true;
 		setTimeout(function() {
-			isThrottled = false; // (3)
+			isThrottled = false;
 			if (savedArgs) {
 				wrapper.apply(savedThis, savedArgs);
 				savedArgs = savedThis = null;
@@ -626,99 +597,34 @@ function throttle(func, ms) {
 	return wrapper;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// картинки на карте
-// function drawOnMap() {
-// 	imgOnMap = new google.maps.GroundOverlay('https://img.jpg', imageBounds);
-// 	imgOnMap.setMap(map);
-// }
-
-
-
-
-
-/*function traffic() {
-	var trafficLayer = new google.maps.TrafficLayer();
-	trafficLayer.setMap(map);
-}
-
-
-function autoPath() {
-	var GDS = new google.maps.DirectionsService;
-	var countedPath = new google.maps.DirectionsRenderer;
-	countedPath.setMap(map);
-	countedPath.setOptions({draggable: true});
-	calculateAndDisplayRoute(GDS, countedPath);
-}
-
-function calculateAndDisplayRoute(GDS, countedPath) {
-	var
-		a = 'Moscow',
-		b = 'Vologda'
-		mode = 'DRIVING';
-  GDS.route({
-    origin: a,
-    destination: b,
-    travelMode: mode
-    // waypoints: [{location: 'Cocklebiddy, WA'}, {location: 'Broken Hill, NSW'}]
-  }, function(response, status) {
-    if (status === google.maps.DirectionsStatus.OK) {
-      countedPath.setDirections(response);
-    } else {
-      console.log('fail' + status);
-    }
-  });
-}
-*/
-/*// рисуем путь
-$('[data-draw-path]').on('click', function() {
-	currentPath = [];
-	map.addListener('click', function(e) {
-	})
-
-});
-
-$('[data-draw-path2]').on('click', function() {
-	$('[data-input-kml]').val(JSON.stringify(currentPath))
-	drawedPath.setMap(null);
-});
-
-function drawPath() {
-	drawedPath = new google.maps.Polyline({
-		path: currentPath,
-		geodesic: true,
-		strokeColor: '#2D4AD1',
-		strokeOpacity: 0.7,
-		strokeWeight: 3
+// ajax отправка данных через localhost
+function sendData() {
+	currentData = clearData(currentData);
+	$.ajax('/api', {
+		data: JSON.stringify(currentData),
+		type: 'POST',
+		success: function(responseData) {
+			setLocalStorage();
+			clearMarkers();
+			markers = [];
+			currentMarkersRender(currentData);
+		}
 	});
+}
 
-	drawedPath.setMap(map);
-}*/
-
-
-
-/*function elevation(argument) {
-	https://developers.google.com/maps/documentation/javascript/examples/elevation-paths?hl=ru
-}*/
+// отправка через PHP
+// function sendData() {
+// 	currentData = clearData(currentData);
+// 	var jsonString = JSON.stringify(currentData);
+// 	$.ajax({
+// 		url: '../write.php',
+// 		data: {
+// 			'jsonString': jsonString
+// 		},
+// 		type: 'POST'
+// 	});
+// 	setLocalStorage();
+// 	clearMarkers();
+// 	markers = [];
+// 	currentMarkersRender(currentData);
+// }
