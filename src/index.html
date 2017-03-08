@@ -8,7 +8,15 @@
 </head>
 <body>
 	<div class="wrapper">
-		<div class="inputDataForm" InputForm style="display: none">
+		<div class="userForm inputDataForm" data-user-form hidden>
+			<div class="userForm header-title">Создать свою историю или смотреть Grus'a</div>
+			<label class="label" for="header">Ваше имя</label>
+			<input class="input" type="text" data-new-user-input>
+				<div class="header-title"></div>
+				<button class="button" type="button" data-button-new-user><span>Создать</span></button>
+				<button class="button" type="button" data-button-grus><span>Grus</span></button>
+		</div>
+		<div class="inputDataForm" InputForm hidden>
 			<div class="header">
 				<div class="header-title" data-drag-form></div>
 				<button class="close" type="button" data-close-input-cross></button>
@@ -51,11 +59,11 @@
 					<button class="button" type="button" data-button-save><span>Сохранить</span></button>
 					<button class="button" type="button" data-button-cancel><span>Отмена</span></button>
 				</div>
-				<button class="button" type="button" data-button-delete style="display: none"><span>Удалить</span></button>
+				<button class="button" type="button" data-button-delete><span>Удалить</span></button>
 			</div>
 		</div>
 
-		<div class="infoform" data-infoform style="display: none">
+		<div class="infoform" data-infoform hidden>
 			<div class="headInfo" id="field3" data-infoform-head></div><button class="close" type="button" data-close-info-cross></button>
 
 			<div class="field">
@@ -65,14 +73,14 @@
 				<p class="formField" id="field1"></p>
 			</div>
 
-			<div class="field">
+			<div class="field" data-date-field>
 				<div class="wat">
 					Дата
 				</div>
 				<p class="formField" id="field2"></p>
 			</div>
 
-			<div class="field">
+			<div class="field" data-desc-field>
 				<div class="wat">
 					Описание
 				</div>
@@ -86,7 +94,7 @@
 			<button class="button buttonway" type="button" id="way" data-kml><span>Маршрут</span></button>
 		</div>
 
-		<div class="data-fotoform" data-fotoform style="display: none">
+		<div class="data-fotoform" data-fotoform hidden>
 			<div class="images img-tmpl" data-fotoform-img hidden>{{##}}</div>
 			<div class="left-area" data-area="left"></div>
 			<div class="right-area" data-area="right"></div>

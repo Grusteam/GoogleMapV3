@@ -1,66 +1,92 @@
+'use strict';
+/*globals $:false, document:false, window:false, alert:false, console:false, localStorage:false, google:false, setTimeout:false, clearTimeout:false */
+
 // объявление глобальных переменных
 var 
+	state = 'local',
 	localData,
 	toLocalStorage,
 	map,
 	currentOldMarker,
 	newMarker,
 	currentData,
+	shortLat,
+	shortLng,
 	LatLng,
+	formX,
+	formY,
 	mouseX,
+	ID,
+	USER,
 	mouseY,
-	fotoArr = [],
 	currentKml,
 	drawedPath,
+	maxID = 0,
+	fotoArr = [],
 	currentPath = [],
-	markers = [],
+	markersObj = {},
 	update_timeout = null,
 	successIndexes = ['ru', 'net', 'com', 'jpg', 'png', 'http', 'www', 'img', 'https'],
 	Icon = 'images/100.png',
 	defaultCenter = {
 		lat: 47.2,
 		lng: 39.7
-	};
+	},
+	USER = localStorage.getItem('USER');
 
+USER || newUser();
 
-//следим за курсором
-function mouseListener() {
-	document.onmousemove = function(e) {
-		// появление инфоформ
-		formX = e.pageX > $(window).width() - 220 ? $(window).width() - 440 : e.pageX > 220 ? e.pageX - 220 : 0;
-		formY = e.pageY < $('[data-infoform]').height() + 20 ? 0 : e.pageY - $('[data-infoform]').height() - 35;
-		// перемещение форм
-		mouseX = e.pageX > 0 ? e.pageX : 0;
-		mouseY = e.pageY > 0 ? e.pageY : 0;
-	};
+if (state === 'local') {
+	var sendData = localSend;
+	USER = 'data';
+} else {
+	var sendData = serverSend;
 }
 
 start();
 
 // запарашиваем данные из файла	
 function start() {
-	// localData = localStorage.getItem('G3DATA');
+	// localData = localStorage.getItem('G3DATA'); // локал сторэдж версия
 	// localData = false;
+	// localStorage.setItem('USER', 'Grus');
+	
+	
 	if (localData) {
 		currentData = JSON.parse(localData);
 		mapRender();
 		console.log('localData');
 	} else {
-		$.ajax('/data/data.json', {
+		$.ajax('/data/' + USER + '.json', {
 			type: 'GET',
 			cache: false,
 			success: function(data) {
-				// console.log(typeof data); // разный тип при разном разхмещении
-				currentData = data; // для локалхоста
-				// currentData = JSON.parse(data); // для серевера
+				currentData = typeof data === 'string' ? JSON.parse(data) : data;
 				mapRender();
 				setLocalStorage();
-			}
+			},
+			error: function (xhr, ajaxOptions, thrownError){
+    		if(xhr.status==404) {
+       			console.log(thrownError);
+       			USER = 'data';
+       			start();
+    		}
+}
 		});
 		console.log('webData');
 	}
 }
 
+// 
+function newUser() {
+	
+	USER = 'data';
+	setTimeout(function () {
+		$('[data-user-form]').show();
+	}, 1000)
+}
+
+// запись в LocalStorage
 function setLocalStorage() {
 	toLocalStorage = JSON.stringify(currentData);
 	localStorage.setItem('G3DATA', toLocalStorage);
@@ -87,6 +113,17 @@ function init() {
 	currentMarkersRender();
 }
 
+//следим за курсором
+function mouseListener() {
+	document.onmousemove = function(e) {
+		// появление инфоформ
+		formX = e.pageX > $(window).width() - 220 ? $(window).width() - 440 : e.pageX > 220 ? e.pageX - 220 : 0;
+		formY = e.pageY < $('[data-infoform]').height() + 20 ? 0 : e.pageY - $('[data-infoform]').height() - 35;
+		// перемещение форм
+		mouseX = e.pageX > 0 ? e.pageX : 0;
+		mouseY = e.pageY > 0 ? e.pageY : 0;
+	};
+}
 
 //рендер старых маркеров из полыченной информации
 function currentMarkersRender() {
@@ -104,17 +141,23 @@ function creaeteCurrentMarker(item, i) {
 		icon: Icon
 	});
 
-	markers.push(tempMark);
-
+	var tempID = item.ID;
+	maxID = item.ID > maxID ? item.ID : maxID;
+	tempMark.setZIndex(tempID);
+	markersObj[tempID] = tempMark;
+	
 	tempMark.addListener('click', function() {
+
+		/*map.panTo(LatLng);
+		if (map.getZoom() < 9){
+		map.setZoom(10);
+		};*/
+
 		hideInfoform();
 		currentOldMarker = item;
-		currentOldMarker.I = i;
+		// console.log(currentOldMarker);
+		// console.log(this.getZIndex());
 		LatLng = currentOldMarker.LatLng;
-		// map.panTo(LatLng);
-		// if (map.getZoom() < 9){
-		// map.setZoom(10);
-		// };
 		infoformRender();
 		drag();
 		hideFotoform();
@@ -138,15 +181,10 @@ function creaeteCurrentMarker(item, i) {
 }
 
 // скрытие маркера на текущей карте
-function setMapOnAll(map) {
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(map);
-	}
+function setMarkerMap(ID, map) {
+	markersObj[ID].setMap(map);
 }
 
-function clearMarkers() {
-	setMapOnAll(null);
-}
 
 //установка обработчиков событий нового маркера
 function setupMarkersListeners() {
@@ -182,6 +220,7 @@ function setupMarkersListeners() {
 
 //рендер кмл
 function kmlRender(x) {
+	// x = window.location.href + 'data/kml/' + x;
 	currentKml = new google.maps.KmlLayer({
 		url: x,
 		map: map
@@ -199,9 +238,16 @@ function setupButtonsListeners() {
 	});
 
 	$('[data-button-delete]').on('click', function() {
-		currentData[currentOldMarker.I] = 0;
+		setMarkerMap(currentOldMarker.ID, null);
+		for (var i = 0; i < currentData.length; i++) {
+			
+			 if (currentData[i].ID === currentOldMarker.ID) {
+			 	delete currentData[i];
+			 }
+		}
+		currentData = clearData(currentData);
 		hideInputForm();
-		sendData();
+		sendData(currentData);
 	});
 
 	$('[data-close-input-cross]').on('click', function() {
@@ -229,6 +275,22 @@ function setupButtonsListeners() {
 		kmlRender(currentOldMarker.kml);
 	});
 
+	$('[data-button-new-user]').on('click', function() {
+		var newName = $('[data-new-user-input]').val();
+		if (newName !== ''){
+			USER = newName;
+			localStorage.setItem('USER', newName);
+			sendData([]);
+			resetAll();
+			$('[data-user-form]').hide();
+		}
+	});
+
+	$('[data-button-grus]').on('click', function() {
+		localStorage.setItem('USER', 'data');
+		$('[data-user-form]').hide();
+	});
+
 	$('[closeFoto]').on('click', function() {
 		hideFotoform();
 	});
@@ -245,7 +307,7 @@ function setupButtonsListeners() {
 function updateForm(state) {
 	shortCoords();
 	$('[data-lat-lng]').attr('value', shortLat + ', ' + shortLng);
-	$('[data-button-delete]').hide();
+	// $('[data-button-delete]').hide();
 	if (state == 'new') {
 		$('[data-drag-form]').html('Добавление новой точки');
 		$('[data-input-form-date]').val('');
@@ -261,10 +323,12 @@ function updateForm(state) {
 		$('[data-input-form-description]').val(currentOldMarker.description);
 		$('[data-input-photo]').val(currentOldMarker.photo);
 		$('[data-input-kml]').val(currentOldMarker.kml);
-		$('[data-draw-path]').hide();
+
+
+		/*$('[data-draw-path]').hide();
 		if (currentOldMarker.kml === '') {
 			$('[data-draw-path]').show();
-		}
+		}*/
 	}
 }
 
@@ -279,8 +343,18 @@ function updateCurrentData() {
 		header: $('[data-input-form-header]').val(),
 		description: $('[data-input-form-description]').val(),
 		photo: $('[data-input-photo]').val(),
-		kml: $('[data-input-kml]').val()
+		kml: $('[data-input-kml]').val(),
 	};
+
+
+
+
+
+
+
+
+
+
 
 	if (x.header === 'del') {
 		$('[data-button-delete]').show();
@@ -290,16 +364,21 @@ function updateCurrentData() {
 }
 
 function next(x) {
+
 	hideInputForm();
+
 	for (var i = currentData.length - 1; i >= 0; i--) {
 		if (x.LatLng.lat == currentData[i].LatLng.lat) {
+			x.ID = currentOldMarker.ID;
 			currentData[i] = x;
-			sendData();
+			sendData(currentData);
 			return;
 		}
 	}
+	x.ID = maxID + 1;
 	currentData.push(x);
-	sendData();
+	creaeteCurrentMarker(x);
+	sendData(currentData);
 }
 
 function drag() {
@@ -422,7 +501,8 @@ function moveFotoForm(x, y) {
 }
 
 //поле фотографий
-var imgTemplate = $('[data-fotoform-img]').clone().html();
+var
+	imgTemplate = $('[data-fotoform-img]').clone().html();
 
 function photoPrepare(string) {
 	var fotohtml = [];
@@ -431,7 +511,7 @@ function photoPrepare(string) {
 	var z = '';
 	y.forEach(function(it, i) {
 		fotoArr.push(it);
-		forRama = '<img src="' + it + '">';
+		var forRama = '<img src="' + it + '">';
 		var tempString = imgTemplate.replace('{{##}}', forRama);
 		fotohtml.push(tempString);
 		z += '<img src="' + it + '" class="img-preview" data-prev-num="' + (i + 1) + '" />';
@@ -459,8 +539,10 @@ function infoformRender() {
 	$('[data-kml] span').html('Маршрут');
 	$('#field1').html(shortLat + ', ' + shortLng);
 	var x = currentOldMarker.date;
+	x === '' ? $('[data-date-field]').hide() : $('[data-date-field]').show();
 	$('#field2').html(x.substr(8, 2) + '.' + x.substr(5, 2) + '.' + x.substr(0, 4));
 	$('#field3').html(currentOldMarker.header);
+	currentOldMarker.description === '' ? $('[data-desc-field]').hide() : $('[data-desc-field]').show();
 	$('#field4').html(currentOldMarker.description);
 	$('[data-previews]').html(photoPrepare(currentOldMarker.photo));
 }
@@ -498,13 +580,6 @@ function hideFotoform() {
 	$('[data-fotoform]').fadeOut(300);
 }
 
-function clearData(arr) {
-	var clearArr = arr.filter(function(it, i, arr) {
-		return it !== 0 && it !== null;
-	});
-	return clearArr;
-}
-
 //отдельная секция фоторамы
 var count,
 	paginationDot = $('.dot-tmpl').clone().html(),
@@ -512,6 +587,7 @@ var count,
 	isThrottled = false,
 	fotoramaIndex = 1,
 	fotoramaWdth = $('.data-fotoform').width(),
+	dataOfPad,
 	paginationHtmlArr;
 
 
@@ -568,7 +644,7 @@ function fotoramaRender() {
 
 $('.pagination').click(function(e) {
 	makeBlue();
-	fotoramaIndex = +e.target.dataset.dotInd;
+	fotoramaIndex = +e.target.dataset.dotInd ? +e.target.dataset.dotInd : fotoramaIndex;
 	fotoramaRender();
 });
 
@@ -597,34 +673,56 @@ function throttle(func, ms) {
 	return wrapper;
 }
 
-// ajax отправка данных через localhost
-function sendData() {
-	currentData = clearData(currentData);
-	$.ajax('/api', {
-		data: JSON.stringify(currentData),
-		type: 'POST',
-		success: function(responseData) {
-			setLocalStorage();
-			clearMarkers();
-			markers = [];
-			currentMarkersRender(currentData);
-		}
+function clearData(arr) {
+	var clearArr = arr.filter(function(it, i, arr) {
+	return it !== 0 && it !== null && it !== undefined && it.LatLng;
 	});
+	return clearArr;
 }
 
-// отправка через PHP
-// function sendData() {
-// 	currentData = clearData(currentData);
-// 	var jsonString = JSON.stringify(currentData);
-// 	$.ajax({
-// 		url: '../write.php',
-// 		data: {
-// 			'jsonString': jsonString
-// 		},
-// 		type: 'POST'
-// 	});
-// 	setLocalStorage();
-// 	clearMarkers();
-// 	markers = [];
-// 	currentMarkersRender(currentData);
-// }
+
+
+
+
+function localSend(x) {
+	var jsonString = JSON.stringify(x);
+	$.ajax({
+			url: '/api',
+			type: 'POST',
+			data: jsonString
+		})
+		.done(function() {
+			console.log("сакис");
+		})
+		.fail(function() {
+			alert("error");
+		})
+		.always(function() {});
+}
+
+function serverSend(x) {
+	var jsonString = JSON.stringify(x);
+	$.ajax({
+			url: '../write.php',
+			type: 'POST',
+			data: {
+				'jsonString': jsonString,
+				'USER': USER
+			}
+		})
+		.done(function() {
+			console.log("сакис");
+		})
+		.fail(function() {
+			alert("error");
+		})
+		.always(function() {});
+}
+
+function resetAll() {
+	currentData = [];
+	for (var key in markersObj) {
+		setMarkerMap(key, null);
+	}
+	markersObj = {};
+}
