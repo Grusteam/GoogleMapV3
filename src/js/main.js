@@ -3,7 +3,6 @@
 
 // объявление глобальных переменных
 var 
-	state = 'local',
 	localData,
 	toLocalStorage,
 	map,
@@ -32,11 +31,13 @@ var
 		lat: 47.2,
 		lng: 39.7
 	},
+	locUrl = window.location.href,
+	locState = (locUrl.indexOf('localhost') >= 0),
 	USER = localStorage.getItem('USER');
 
 USER || newUser();
 
-if (state === 'local') {
+if (locState) {
 	var sendData = localSend;
 	USER = 'data';
 } else {
@@ -145,7 +146,7 @@ function creaeteCurrentMarker(item, i) {
 	maxID = item.ID > maxID ? item.ID : maxID;
 	tempMark.setZIndex(tempID);
 	markersObj[tempID] = tempMark;
-	
+
 	tempMark.addListener('click', function() {
 
 		/*map.panTo(LatLng);
@@ -168,16 +169,15 @@ function creaeteCurrentMarker(item, i) {
 			placeInfoform(formX, formY);
 			showInfoform();
 		}, 200);
-	});
 
-	tempMark.addListener('dblclick', function() {
-		if (newMarker) newMarker.setMap(null);
-		clearTimeout(update_timeout);
-		hideInfoform();
-		updateForm('old');
-		showInputForm();
+		tempMark.addListener('dblclick', function() {
+			if (newMarker) newMarker.setMap(null);
+			clearTimeout(update_timeout);
+			hideInfoform();
+			updateForm('old');
+			showInputForm();
+		});
 	});
-
 }
 
 // скрытие маркера на текущей карте
@@ -220,7 +220,11 @@ function setupMarkersListeners() {
 
 //рендер кмл
 function kmlRender(x) {
-	// x = window.location.href + 'data/kml/' + x;
+	if ( locState ) {
+		x = 'http://grus.co.nf/data/kml/' + x;
+	} else {
+		x = locUrl + 'data/kml/' + x;
+	}
 	currentKml = new google.maps.KmlLayer({
 		url: x,
 		map: map
@@ -246,6 +250,7 @@ function setupButtonsListeners() {
 			 }
 		}
 		currentData = clearData(currentData);
+		newMarker.setMap(null);
 		hideInputForm();
 		sendData(currentData);
 	});
@@ -379,6 +384,7 @@ function next(x) {
 	currentData.push(x);
 	creaeteCurrentMarker(x);
 	sendData(currentData);
+	currentOldMarker = currentData[currentData.length - 1];
 }
 
 function drag() {
@@ -721,6 +727,7 @@ function serverSend(x) {
 
 function resetAll() {
 	currentData = [];
+	maxID = 0;
 	for (var key in markersObj) {
 		setMarkerMap(key, null);
 	}
