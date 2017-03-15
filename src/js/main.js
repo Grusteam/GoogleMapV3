@@ -47,19 +47,19 @@ if (locState) {
 }
 
 start();
-
+console.log(screen.width);
 /*все что касается изменения разрешения*/
-lastWidth = currentWidth = window.innerWidth;
+lastWidth = currentWidth = $('[InputForm]').width();
+
+// $('[data-info]').html(currentWidth);
 
 window.onresize = function(event) {
-	currentWidth = window.innerWidth;
-	if ((lastWidth < 1000 && currentWidth >= 1000) || (lastWidth >= 1000 && currentWidth < 1000)) {
+	currentWidth = $('[InputForm]').width();
+	if ((lastWidth === 430 && currentWidth === 200) || (lastWidth === 200 && currentWidth === 430)) {
 		lastWidth = currentWidth;
 		resizeResolution();
 		fotoramaWdth = $('.data-fotoform').width();
 		currentOldMarker && photoPrepare(currentOldMarker.photo) && console.log('photoPrepare');;
-		// console.log(fotoramaWdth);
-		// initFotorama();
 		fotoramaRender();
 	}
 };
@@ -67,13 +67,12 @@ window.onresize = function(event) {
 resizeResolution();
 
 function resizeResolution() {
-	if (currentWidth < 1000) {
+	if (currentWidth === 200) {
 		Icon = 'images/200.png';
-		redrawMarkers();
-	} else {
+	} else if (currentWidth === 430) {
 		Icon = 'images/100.png';
-		redrawMarkers();
 	}
+		redrawMarkers();
 }
 
 function redrawMarkers() {
@@ -500,8 +499,8 @@ function moveInfoform(x, y) {
 	if (y < 0) {
 		y = 0;
 	}
-	if (x + 440 > window.innerWidth) {
-		x = window.innerWidth - 440;
+	if (x + 440 > screen.width) {
+		x = screen.width - 440;
 	}
 	if (y + $('[data-infoform]').height() + 20 > window.innerHeight) {
 		y = window.innerHeight - $('[data-infoform]').height() - 20;
@@ -517,8 +516,8 @@ function moveInputDataForm(x, y) {
 	if (y < 0) {
 		y = 0;
 	}
-	if (x + $('[InputForm]').width() + 40 > window.innerWidth) {
-		x = window.innerWidth - $('[InputForm]').width() - 40;
+	if (x + $('[InputForm]').width() + 40 > screen.width) {
+		x = screen.width - $('[InputForm]').width() - 40;
 	}
 	if (y + $('[InputForm]').height() + 20 > window.innerHeight) {
 		y = window.innerHeight - $('[InputForm]').height() - 20;
@@ -529,7 +528,7 @@ function moveInputDataForm(x, y) {
 
 function placeFotoform() {
 	var
-		x = window.innerWidth - 800,
+		x = screen.width - 800,
 		y = 0;
 	moveFotoForm(x, y);
 }
@@ -541,8 +540,8 @@ function moveFotoForm(x, y) {
 	if (y < 0) {
 		y = 0;
 	}
-	if (x + $('[data-fotoform]').width() > window.innerWidth) {
-		x = window.innerWidth - 800;
+	if (x + $('[data-fotoform]').width() > screen.width) {
+		x = screen.width - 800;
 	}
 	if (y + $('[data-fotoform-img]').height() > window.innerHeight) {
 		y = window.innerHeight - $('[data-fotoform-img]').height();

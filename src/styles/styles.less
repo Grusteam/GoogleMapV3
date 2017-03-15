@@ -423,8 +423,25 @@ textarea.input
     bottom: 0;
 }
 
-@media (max-width: 992px)
-{
+// @media (max-width: 366px) and (-webkit-device-pixel-ratio: 3), (max-width: 1100px)
+// 
+// 
+
+// 360x640
+
+
+@media (max-width: 360px) {
+/* 	body {
+	&::before {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 200;
+		background-color: #fff;
+		content: 'SMALL';
+	}
+} */
+
     .inputDataForm
     {
         width: 200px;
@@ -446,10 +463,23 @@ textarea.input
     {
         width: 200px;
     }
-	
-	.data-fotoform
+
+    .data-fotoform
     {
-    width: 400px;
-    height: 300px;
+        width: 400px;
+        height: 300px;
     }
 }
+
+/* @media (min-width: 640px) {
+    body {
+    	&::before {
+    		position: absolute;
+    		top: 0;
+    		left: 0;
+    		z-index: 200;
+    		background-color: #fff;
+    		content: 'BIG';
+    	}
+    }
+} */
