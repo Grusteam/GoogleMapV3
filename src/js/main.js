@@ -20,6 +20,8 @@ var
 	mouseY,
 	currentKml,
 	drawedPath,
+	lastWidth,
+	currentWidth,
 	maxID = 0,
 	fotoArr = [],
 	currentPath = [],
@@ -45,6 +47,49 @@ if (locState) {
 }
 
 start();
+
+/*все что касается изменения разрешения*/
+lastWidth = currentWidth = window.innerWidth;
+
+window.onresize = function(event) {
+	currentWidth = window.innerWidth;
+	if ((lastWidth < 1000 && currentWidth >= 1000) || (lastWidth >= 1000 && currentWidth < 1000)) {
+		lastWidth = currentWidth;
+		resizeResolution();
+		fotoramaWdth = $('.data-fotoform').width();
+		currentOldMarker && photoPrepare(currentOldMarker.photo) && console.log('photoPrepare');;
+		// console.log(fotoramaWdth);
+		// initFotorama();
+		fotoramaRender();
+	}
+};
+
+resizeResolution();
+
+function resizeResolution() {
+	if (currentWidth < 1000) {
+		Icon = 'images/200.png';
+		redrawMarkers();
+	} else {
+		Icon = 'images/100.png';
+		redrawMarkers();
+	}
+}
+
+function redrawMarkers() {
+	if (newMarker) {
+		newMarker.icon = Icon;
+		newMarker.setMap(null);
+		newMarker.setMap(map);
+	}
+	for (var key in markersObj) {
+		var marker = markersObj[key];
+		marker.icon = Icon;
+		marker.setMap(null);
+		marker.setMap(map);
+	}
+}
+/**/
 
 // запарашиваем данные из файла	
 function start() {
@@ -517,7 +562,7 @@ function photoPrepare(string) {
 	var z = '';
 	y.forEach(function(it, i) {
 		fotoArr.push(it);
-		var forRama = '<img src="' + it + '">';
+		var forRama = '<img src="' + it + '" ' + 'width="' + fotoramaWdth + '" >';
 		var tempString = imgTemplate.replace('{{##}}', forRama);
 		fotohtml.push(tempString);
 		z += '<img src="' + it + '" class="img-preview" data-prev-num="' + (i + 1) + '" />';

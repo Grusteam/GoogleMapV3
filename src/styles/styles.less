@@ -37,8 +37,9 @@ ul
 
 .userForm
 {
-	z-index: 99;
     position: absolute;
+    z-index: 99;
+
     max-width: 200px;
     padding: 0 10px 10px;
 
@@ -48,11 +49,11 @@ ul
 
 .user-title
 {
-  font-size: 12px;
+    font-size: 12px;
 
-    margin-right: 0px;
+    margin-right: 0;
 
-    color: #fff;  
+    color: #fff;
 }
 
 .inputDataForm
@@ -420,4 +421,35 @@ textarea.input
     position: absolute;
     right: 0;
     bottom: 0;
+}
+
+@media (max-width: 992px)
+{
+    .inputDataForm
+    {
+        width: 200px;
+        min-width: 200px;
+    }
+    textarea.input
+    {
+        width: 180px;
+    }
+    .controls
+    {
+        padding-left: 0;
+    }
+    .button
+    {
+        margin-bottom: 5px;
+    }
+    .infoform
+    {
+        width: 200px;
+    }
+	
+	.data-fotoform
+    {
+    width: 400px;
+    height: 300px;
+    }
 }
