@@ -47,7 +47,7 @@ if (locState) {
 }
 
 start();
-console.log(screen.width);
+console.log(screen.width, 888888);
 /*все что касается изменения разрешения*/
 lastWidth = currentWidth = $('[InputForm]').width();
 
